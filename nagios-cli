@@ -113,7 +113,6 @@ def api(args):
     verb = args[0]
     objid = args[1] if len(args) >= 2 and args[1].isdigit() else ''
     url = '%s/%s/%s' % (URL, verb, objid)
-
     # Now build the reqobj
     obj = {}
     for kv in args[2 if objid else 1:]:
@@ -558,10 +557,14 @@ def do_acknowledge_problem(cmd, args, opts):
 def do_hosts(cmd, args, opts):
     '''Return a plain list of all hosts.
 
-    '''
-    global NAGIOS
-    for host in NAGIOS:
-        print host
+    '''    
+    ret = api(['state'])
+    NAGIOS = ret['content']
+    for host, obj  in NAGIOS.iteritems():
+        state = 'up'
+        if int(obj['current_state']) != 0:
+            state = 'down'
+        print "%-50s %s" % (host, state)
     return 0
 
 
